@@ -1,0 +1,24 @@
+#ifndef STATION_H_INCLUDED
+#define STATION_H_INCLUDED
+
+#include <Arduino.h>
+#ifdef ESP32
+  #include <HTTPClient.h>
+  #include <WiFi.h>
+#elif ESP8266
+  #include <ESP8266HTTPClient.h>
+  #include <ESP8266WiFi.h>
+#endif
+
+#include "common.h"
+// #include "eeprom-handler.h"
+
+#define CFG_WIFI_SSID xstr(WIFI_SSID)
+#define CFG_WIFI_PASSWORD xstr(WIFI_PASSWORD)
+
+#define WIFI_CONNECT_RETRIES 50
+
+bool setupWiFi();
+bool makeNetworkRequest(const char * url, const char * authorization, const char * content);
+
+#endif
