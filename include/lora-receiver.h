@@ -19,7 +19,7 @@
 #define BAND 866E6
 
 
-bool onReceive();
+bool onReceive(int packetSize);
 bool setupLoRa();
 
 #endif

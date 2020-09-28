@@ -1,36 +1,48 @@
 #include "lora-receiver.h"
 
-char LoRaData[600];
 
-void onReceive(int packetSize) {
+bool onReceive(int packetSize) {
+  char LoRaData[255];
+  char content[255];
+  StaticJsonDocument<800> doc;
+
   // received a packet
-  ardprintf("Received packet '");
+  ardprintf("Received packet with length %d", packetSize);
 
   // read packet
   for (int i = 0; i < packetSize; i++) {
     LoRaData[i] = LoRa.read();
-    ardprintf("%c", (char)LoRa.read());
   }
   LoRaData[packetSize] = '\0';
+  //ardprintf("%s", LoRaData);
 
   // print RSSI of packet
-  ardprintf("' with RSSI %s", LoRa.packetRssi());
+  ardprintf("with RSSI %d", LoRa.packetRssi());
 
   /* packet will be in JSON format:
     {
       "url": "http://test.com",
-      "authorization": "authorization",
-      "content": {...}
+      "auth": "authorization",
+      "data": {...}
     }
   */
-  StaticJsonDocument<800> doc;
   deserializeJson(doc, LoRaData);
-  JsonObject documentRoot = doc.as<JsonObject>();
-  const char * authorization = documentRoot.getMember("authorization").as<char *>();
-  const char * content = documentRoot.getMember("content").as<char *>();
-  const char * url = documentRoot.getMember("url").as<char *>();
 
-  makeNetworkRequest(url, authorization, content);
+  JsonObject documentRoot = doc.as<JsonObject>();
+
+  const char * authorization = documentRoot.getMember("auth").as<char *>();
+  ardprintf("Get auth %s", authorization);
+
+  JsonObject jsonContent = documentRoot.getMember("data").as<JsonObject>();
+
+  const char * url = documentRoot.getMember("url").as<char *>();
+  ardprintf("Get url %s", url);
+
+  // reuse buffer
+  serializeJson(jsonContent, content);
+  //ardprintf(content);
+
+  return makeNetworkRequest(url, authorization, content);
 }
 
 bool setupLoRa() {
@@ -45,12 +57,6 @@ bool setupLoRa() {
   }
 
   ardprintf("LoRa initialized");
-
-  // register the receive callback
-  LoRa.onReceive(onReceive);
-
-  // put the radio into receive mode
-  LoRa.receive();
 
   return true;
 }
