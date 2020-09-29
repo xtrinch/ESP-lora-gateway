@@ -4,15 +4,9 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
   
-  if (!setupWiFi()) {
-    ardprintf("Setting up WiFi failed");
-    while (1);
-  }
+  while (!setupWiFi());
 
-  if (!setupLoRa()) {
-    ardprintf("Setup LoRa failed");
-    while(1);
-  }
+  while (!setupLoRa());
 }
 
 void loop() {
