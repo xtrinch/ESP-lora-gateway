@@ -42,12 +42,14 @@ bool onReceive(int packetSize) {
   serializeJson(jsonContent, content);
   //ardprintf(content);
 
-  return makeNetworkRequest(url, authorization, content);
+  return makeSecureNetworkRequest(url, authorization, content);
 }
 
 bool setupLoRa() {
   // SPI LoRa pins
   SPI.begin(SCK, MISO, MOSI, SS);
+
+  LoRa.setSPIFrequency(1E5);
 
   // setup LoRa transceiver module
   LoRa.setPins(SS, RST, DIO0);
